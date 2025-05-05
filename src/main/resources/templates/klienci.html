@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Klienci - IPTV Manager</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Zarządzanie klientami</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <button onclick="toggleForm('dodajKlientaForm')" class="btn btn-sm btn-primary">
+                    Dodaj klienta
+                </button>
+            </div>
+        </div>
+
+        <!-- Formularz dodawania klienta -->
+        <div id="dodajKlientaForm" style="display: none;" class="card mb-4">
+            <div class="card-header">
+                <h5>Dodaj nowego klienta</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/klienci/dodaj}" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="imie" class="form-label">Imię</label>
+                            <input type="text" class="form-control" id="imie" name="imie" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="nazwisko" class="form-label">Nazwisko</label>
+                            <input type="text" class="form-control" id="nazwisko" name="nazwisko" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="numerKlienta" class="form-label">Numer klienta</label>
+                            <input type="text" class="form-control" id="numerKlienta" name="numerKlienta" required>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" onclick="toggleForm('dodajKlientaForm')" class="btn btn-secondary">Anuluj</button>
+                        <button type="submit" class="btn btn-primary">Zapisz klienta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Formularz edycji klienta -->
+        <div th:if="${klientEdit != null}" id="edytujKlientaForm" class="card mb-4">
+            <div class="card-header">
+                <h5>Edytuj klienta</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/klienci/edytuj/{id}(id=${klientEdit.id})}" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="editImie" class="form-label">Imię</label>
+                            <input type="text" class="form-control" id="editImie" name="imie" th:value="${klientEdit.imie}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="editNazwisko" class="form-label">Nazwisko</label>
+                            <input type="text" class="form-control" id="editNazwisko" name="nazwisko" th:value="${klientEdit.nazwisko}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="editNumerKlienta" class="form-label">Numer klienta</label>
+                            <input type="text" class="form-control" id="editNumerKlienta" name="numerKlienta" th:value="${klientEdit.numerKlienta}" readonly>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <a th:href="@{/klienci}" class="btn btn-secondary">Anuluj</a>
+                        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista klientów -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Lista klientów</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Imię</th>
+                                <th>Nazwisko</th>
+                                <th>Numer klienta</th>
+                                <th>Liczba abonamentów</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${klienci.empty}">
+                                <td colspan="6" class="text-center">Brak klientów w bazie danych</td>
+                            </tr>
+                            <tr th:each="klient : ${klienci}">
+                                <td th:text="${klient.id}"></td>
+                                <td th:text="${klient.imie}"></td>
+                                <td th:text="${klient.nazwisko}"></td>
+                                <td th:text="${klient.numerKlienta}"></td>
+                                <td th:text="${klient.abonamenty.size()}"></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/klienci/edytuj/{id}(id=${klient.id})}" class="btn btn-warning">
+                                            Edytuj
+                                        </a>
+                                        <a th:href="@{/abonamenty/klient/{id}(id=${klient.id})}" class="btn btn-info">
+                                            Abonamenty
+                                        </a>
+                                        <a th:href="@{/klienci/usun/{id}(id=${klient.id})}" class="btn btn-danger"
+                                           onclick="return confirm('Czy na pewno chcesz usunąć tego klienta?')">
+                                            Usuń
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

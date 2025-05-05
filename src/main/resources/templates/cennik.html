@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cennik - IPTV Manager</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Zarządzanie cennikiem</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <button onclick="toggleForm('dodajPozycjeForm')" class="btn btn-sm btn-primary me-2">
+                    Dodaj pozycję cennika
+                </button>
+                <button onclick="toggleTab('historiaTab')" id="historiaBtn" class="btn btn-sm btn-outline-secondary me-2">
+                    Historia cennika
+                </button>
+                <button onclick="toggleTab('aktualnyTab')" id="aktualnyBtn" class="btn btn-sm btn-outline-secondary active">
+                    Aktualny cennik
+                </button>
+            </div>
+        </div>
+
+        <!-- Formularz dodawania pozycji cennika -->
+        <div id="dodajPozycjeForm" style="display: none;" class="card mb-4">
+            <div class="card-header">
+                <h5>Dodaj nową pozycję cennika</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/cennik/dodaj}" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="typAbonamentu" class="form-label">Typ abonamentu</label>
+                            <select class="form-select" id="typAbonamentu" name="typAbonamentu" required>
+                                <option value="">Wybierz typ</option>
+                                <option th:each="typ : ${typyAbonamentu}" th:value="${typ}" th:text="${typ}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="cena" class="form-label">Cena (zł)</label>
+                            <input type="number" step="0.01" class="form-control" id="cena" name="cena" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="dataOd" class="form-label">Data obowiązywania od</label>
+                            <input type="date" class="form-control" id="dataOd" name="dataOd" 
+                                   th:value="${dzisiaj}" required>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" onclick="toggleForm('dodajPozycjeForm')" class="btn btn-secondary">Anuluj</button>
+                        <button type="submit" class="btn btn-primary">Dodaj do cennika</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Aktualny cennik -->
+        <div id="aktualnyTab" class="card mb-4">
+            <div class="card-header">
+                <h5>Aktualny cennik</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Typ abonamentu</th>
+                                <th>Cena (zł)</th>
+                                <th>Data od</th>
+                                <th>Data do</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${cennikAktualny.empty}">
+                                <td colspan="6" class="text-center">Brak aktywnych pozycji w cenniku</td>
+                            </tr>
+                            <tr th:each="pozycja : ${cennikAktualny}">
+                                <td th:text="${pozycja.id}"></td>
+                                <td th:text="${pozycja.typAbonamentu}"></td>
+                                <td th:text="${#numbers.formatDecimal(pozycja.cena, 1, 2) + ' zł'}"></td>
+                                <td th:text="${pozycja.dataOd}"></td>
+                                <td th:text="${pozycja.dataDo != null ? pozycja.dataDo : '-'}"></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/cennik/dezaktywuj/{id}(id=${pozycja.id})}" class="btn btn-danger"
+                                           onclick="return confirm('Czy na pewno chcesz dezaktywować tę pozycję cennika?')">
+                                            Dezaktywuj
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historia cennika -->
+        <div id="historiaTab" class="card mb-4" style="display: none;">
+            <div class="card-header">
+                <h5>Historia cennika</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Typ abonamentu</th>
+                                <th>Cena (zł)</th>
+                                <th>Data od</th>
+                                <th>Data do</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${cennikHistoria.empty}">
+                                <td colspan="6" class="text-center">Brak pozycji w historii cennika</td>
+                            </tr>
+                            <tr th:each="pozycja : ${cennikHistoria}">
+                                <td th:text="${pozycja.id}"></td>
+                                <td th:text="${pozycja.typAbonamentu}"></td>
+                                <td th:text="${#numbers.formatDecimal(pozycja.cena, 1, 2) + ' zł'}"></td>
+                                <td th:text="${pozycja.dataOd}"></td>
+                                <td th:text="${pozycja.dataDo != null ? pozycja.dataDo : '-'}"></td>
+                                <td>
+                                    <span th:if="${pozycja.aktywny}" class="badge bg-success">Aktywny</span>
+                                    <span th:unless="${pozycja.aktywny}" class="badge bg-danger">Nieaktywny</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formularz dezaktywacji pozycji cennika (pojawia się po kliknięciu "Dezaktywuj") -->
+        <div th:if="${cennikEdit != null}" class="card mb-4">
+            <div class="card-header">
+                <h5>Dezaktywacja pozycji cennika</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/cennik/dezaktywuj/{id}(id=${cennikEdit.id})}" method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table">
+                                <tr>
+                                    <th>Typ abonamentu:</th>
+                                    <td th:text="${cennikEdit.typAbonamentu}"></td>
+                                </tr>
+                                <tr>
+                                    <th>Cena:</th>
+                                    <td th:text="${#numbers.formatDecimal(cennikEdit.cena, 1, 2) + ' zł'}"></td>
+                                </tr>
+                                <tr>
+                                    <th>Data obowiązywania od:</th>
+                                    <td th:text="${cennikEdit.dataOd}"></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="dataDo" class="form-label">Data zakończenia obowiązywania</label>
+                                <input type="date" class="form-control" id="dataDo" name="dataDo" 
+                                       th:value="${dzisiaj}" required>
+                            </div>
+                            <div class="alert alert-warning">
+                                <strong>Uwaga!</strong> Dezaktywacja pozycji cennika uniemożliwi korzystanie z tej ceny w przyszłości.
+                                Upewnij się, że masz przygotowaną nową pozycję cennika dla tego typu abonamentu.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <a th:href="@{/cennik}" class="btn btn-secondary">Anuluj</a>
+                        <button type="submit" class="btn btn-danger">Dezaktywuj</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTab(tabId) {
+            if (tabId === 'aktualnyTab') {
+                document.getElementById('aktualnyTab').style.display = 'block';
+                document.getElementById('historiaTab').style.display = 'none';
+                document.getElementById('aktualnyBtn').classList.add('active');
+                document.getElementById('historiaBtn').classList.remove('active');
+            } else {
+                document.getElementById('aktualnyTab').style.display = 'none';
+                document.getElementById('historiaTab').style.display = 'block';
+                document.getElementById('aktualnyBtn').classList.remove('active');
+                document.getElementById('historiaBtn').classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

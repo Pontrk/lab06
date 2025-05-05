@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Finanse - IPTV Manager</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Zarządzanie finansami</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <button onclick="toggleForm('dodajNaleznoscForm')" class="btn btn-sm btn-primary me-2">
+                    Dodaj należność
+                </button>
+                <button onclick="toggleForm('dodajWplateForm')" class="btn btn-sm btn-success me-2">
+                    Zarejestruj wpłatę
+                </button>
+            </div>
+        </div>
+
+        <!-- Formularz dodawania należności -->
+        <div id="dodajNaleznoscForm" style="display: none;" class="card mb-4">
+            <div class="card-header">
+                <h5>Dodaj nową należność</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/finanse/dodaj-naleznosc}" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="abonamentId" class="form-label">Abonament</label>
+                            <select class="form-select" id="abonamentId" name="abonamentId" required>
+                                <option value="">Wybierz abonament</option>
+                                <option th:each="abonament : ${aktywneAbonamenty}" th:value="${abonament.id}" 
+                                        th:text="${abonament.klient.imie + ' ' + abonament.klient.nazwisko + ' - ' + abonament.typAbonamentu}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="okresRozliczeniowy" class="form-label">Okres rozliczeniowy (RRRR-MM)</label>
+                            <input type="text" class="form-control" id="okresRozliczeniowy" name="okresRozliczeniowy" 
+                                   th:value="${#temporals.format(dzisiaj, 'yyyy-MM')}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="terminPlatnosci" class="form-label">Termin płatności</label>
+                            <input type="date" class="form-control" id="terminPlatnosci" name="terminPlatnosci" 
+                                   th:value="${dzisiaj.plusDays(14)}" required>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" onclick="toggleForm('dodajNaleznoscForm')" class="btn btn-secondary">Anuluj</button>
+                        <button type="submit" class="btn btn-primary">Dodaj należność</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Formularz dodawania wpłaty -->
+        <div id="dodajWplateForm" style="display: none;" class="card mb-4">
+            <div class="card-header">
+                <h5>Zarejestruj nową wpłatę</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/finanse/dodaj-wplate}" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="abonamentIdWplata" class="form-label">Abonament</label>
+                            <select class="form-select" id="abonamentIdWplata" name="abonamentId" required>
+                                <option value="">Wybierz abonament</option>
+                                <option th:each="abonament : ${aktywneAbonamenty}" th:value="${abonament.id}" 
+                                        th:text="${abonament.klient.imie + ' ' + abonament.klient.nazwisko + ' - ' + abonament.typAbonamentu}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="kwota" class="form-label">Kwota</label>
+                            <input type="number" step="0.01" class="form-control" id="kwota" name="kwota" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="dataWplaty" class="form-label">Data wpłaty</label>
+                            <input type="date" class="form-control" id="dataWplaty" name="dataWplaty" 
+                                   th:value="${dzisiaj}" required>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" onclick="toggleForm('dodajWplateForm')" class="btn btn-secondary">Anuluj</button>
+                        <button type="submit" class="btn btn-success">Zarejestruj wpłatę</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Szczegóły dla wybranego abonamentu -->
+        <div th:if="${wybranyAbonament != null}" class="card mb-4">
+            <div class="card-header d-flex justify-content-between">
+                <h5>Finanse abonamentu</h5>
+                <div class="text-end">
+                    <a th:href="@{/abonamenty/szczegoly/{id}(id=${wybranyAbonament.id})}" class="btn btn-sm btn-outline-primary">
+                        Szczegóły abonamentu
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <table class="table table-sm">
+                            <tr>
+                                <th style="width: 150px;">Klient:</th>
+                                <td th:text="${wybranyAbonament.klient.imie + ' ' + wybranyAbonament.klient.nazwisko}"></td>
+                            </tr>
+                            <tr>
+                                <th>Typ abonamentu:</th>
+                                <td th:text="${wybranyAbonament.typAbonamentu}"></td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td>
+                                    <span th:if="${wybranyAbonament.aktywny}" class="badge bg-success">Aktywny</span>
+                                    <span th:unless="${wybranyAbonament.aktywny}" class="badge bg-danger">Nieaktywny</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-end">
+                            <button onclick="toggleForm('dodajNaleznoscAbonamentuForm')" class="btn btn-sm btn-primary me-2">
+                                Dodaj należność
+                            </button>
+                            <button onclick="toggleForm('dodajWplateAbonamentuForm')" class="btn btn-sm btn-success">
+                                Zarejestruj wpłatę
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formularze dla wybranego abonamentu -->
+                <!-- Formularz dodawania należności dla wybranego abonamentu -->
+                <div id="dodajNaleznoscAbonamentuForm" style="display: none;" class="border-top pt-3 mb-4">
+                    <h6>Dodaj nową należność dla tego abonamentu</h6>
+                    <form th:action="@{/finanse/dodaj-naleznosc}" method="post">
+                        <input type="hidden" name="abonamentId" th:value="${wybranyAbonament.id}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="okresRozliczeniowyAbo" class="form-label">Okres rozliczeniowy (RRRR-MM)</label>
+                                <input type="text" class="form-control" id="okresRozliczeniowyAbo" name="okresRozliczeniowy" 
+                                       th:value="${#temporals.format(dzisiaj, 'yyyy-MM')}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="terminPlatnosciAbo" class="form-label">Termin płatności</label>
+                                <input type="date" class="form-control" id="terminPlatnosciAbo" name="terminPlatnosci" 
+                                       th:value="${dzisiaj.plusDays(14)}" required>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" onclick="toggleForm('dodajNaleznoscAbonamentuForm')" class="btn btn-secondary">Anuluj</button>
+                            <button type="submit" class="btn btn-primary">Dodaj należność</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Formularz dodawania wpłaty dla wybranego abonamentu -->
+                <div id="dodajWplateAbonamentuForm" style="display: none;" class="border-top pt-3 mb-4">
+                    <h6>Zarejestruj nową wpłatę dla tego abonamentu</h6>
+                    <form th:action="@{/finanse/dodaj-wplate}" method="post">
+                        <input type="hidden" name="abonamentId" th:value="${wybranyAbonament.id}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="kwotaAbo" class="form-label">Kwota</label>
+                                <input type="number" step="0.01" class="form-control" id="kwotaAbo" name="kwota" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="dataWplatyAbo" class="form-label">Data wpłaty</label>
+                                <input type="date" class="form-control" id="dataWplatyAbo" name="dataWplaty" 
+                                       th:value="${dzisiaj}" required>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" onclick="toggleForm('dodajWplateAbonamentuForm')" class="btn btn-secondary">Anuluj</button>
+                            <button type="submit" class="btn btn-success">Zarejestruj wpłatę</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Należności i wpłaty wybranego abonamentu -->
+                <div class="row">
+                    <!-- Należności -->
+                    <div class="col-md-6">
+                        <h6>Należności</h6>
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Okres</th>
+                                    <th>Kwota</th>
+                                    <th>Termin</th>
+                                    <th>Status</th>
+                                    <th>Akcje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${wybranyAbonament.naleznosci.empty}">
+                                    <td colspan="5" class="text-center">Brak należności</td>
+                                </tr>
+                                <tr th:each="naleznosc : ${wybranyAbonament.naleznosci}">
+                                    <td th:text="${naleznosc.okresRozliczeniowy}"></td>
+                                    <td th:text="${#numbers.formatDecimal(naleznosc.kwota, 1, 2) + ' zł'}"></td>
+                                    <td th:text="${naleznosc.terminPlatnosci}"></td>
+                                    <td>
+                                        <span th:if="${naleznosc.oplacona}" class="badge bg-success">Opłacona</span>
+                                        <span th:unless="${naleznosc.oplacona}" class="badge bg-danger">Nieopłacona</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a th:if="${!naleznosc.oplacona}" th:href="@{/finanse/oplacona/{id}(id=${naleznosc.id})}" 
+                                               class="btn btn-success" title="Oznacz jako opłacona">
+                                                <i class="bi bi-check"></i>
+                                            </a>
+                                            <a th:href="@{/finanse/koryguj-naleznosc/{id}(id=${naleznosc.id})}" 
+                                               class="btn btn-warning" title="Koryguj kwotę">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Wpłaty -->
+                    <div class="col-md-6">
+                        <h6>Wpłaty</h6>
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Kwota</th>
+                                    <th>Korekta</th>
+                                    <th>Opis</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${wybranyAbonament.wplaty.empty}">
+                                    <td colspan="4" class="text-center">Brak wpłat</td>
+                                </tr>
+                                <tr th:each="wplata : ${wybranyAbonament.wplaty}">
+                                    <td th:text="${wplata.dataWplaty}"></td>
+                                    <td th:text="${#numbers.formatDecimal(wplata.kwota, 1, 2) + ' zł'}"></td>
+                                    <td>
+                                        <span th:if="${wplata.czyKorekta}" class="badge bg-warning">Tak</span>
+                                        <span th:unless="${wplata.czyKorekta}" class="badge bg-secondary">Nie</span>
+                                    </td>
+                                    <td th:text="${wplata.opis != null ? wplata.opis : '-'}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista zaległych należności -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Zaległe należności (niezapłacone po terminie)</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Klient</th>
+                                <th>Abonament</th>
+                                <th>Okres</th>
+                                <th>Kwota</th>
+                                <th>Termin płatności</th>
+                                <th>Status monitu</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${zaleglosci.empty}">
+                                <td colspan="8" class="text-center">Brak zaległych należności</td>
+                            </tr>
+                            <tr th:each="naleznosc : ${zaleglosci}">
+                                <td th:text="${naleznosc.id}"></td>
+                                <td th:text="${naleznosc.abonament.klient.imie + ' ' + naleznosc.abonament.klient.nazwisko}"></td>
+                                <td th:text="${naleznosc.abonament.typAbonamentu}"></td>
+                                <td th:text="${naleznosc.okresRozliczeniowy}"></td>
+                                <td th:text="${#numbers.formatDecimal(naleznosc.kwota, 1, 2) + ' zł'}"></td>
+                                <td th:text="${naleznosc.terminPlatnosci}"></td>
+                                <td>
+                                    <span th:if="${naleznosc.statusMonitu == T(com.iptvmanager.model.Naleznosc.StatusMonitu).BRAK}" 
+                                          class="badge bg-secondary">Brak monitu</span>
+                                    <span th:if="${naleznosc.statusMonitu == T(com.iptvmanager.model.Naleznosc.StatusMonitu).MONIT_PIERWSZY}" 
+                                          class="badge bg-info">Pierwszy monit</span>
+                                    <span th:if="${naleznosc.statusMonitu == T(com.iptvmanager.model.Naleznosc.StatusMonitu).MONIT_DRUGI}" 
+                                          class="badge bg-warning">Drugi monit</span>
+                                    <span th:if="${naleznosc.statusMonitu == T(com.iptvmanager.model.Naleznosc.StatusMonitu).MONIT_TRZECI}" 
+                                          class="badge bg-danger">Trzeci monit</span>
+                                    <span th:if="${naleznosc.statusMonitu == T(com.iptvmanager.model.Naleznosc.StatusMonitu).WINDYKACJA}" 
+                                          class="badge bg-dark">Windykacja</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/finanse/abonament/{id}(id=${naleznosc.abonament.id})}" class="btn btn-info">
+                                            Szczegóły
+                                        </a>
+                                        <a th:href="@{/finanse/oplacona/{id}(id=${naleznosc.id})}" class="btn btn-success">
+                                            Opłacona
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

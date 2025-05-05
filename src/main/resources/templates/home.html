@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard - IPTV Manager</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Dashboard</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="text-primary fw-bold">
+                    Data symulacji: <span th:text="${dataSym}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Podsumowanie danych -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-4">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Klienci</h5>
+                        <p class="card-text display-4" th:text="${liczbaKlientow}">0</p>
+                    </div>
+                    <div class="card-footer d-flex">
+                        <a href="/klienci" class="text-white text-decoration-none">Szczegóły »</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Aktywne abonamenty</h5>
+                        <p class="card-text display-4" th:text="${liczbaAktywnychAbonamentow}">0</p>
+                    </div>
+                    <div class="card-footer d-flex">
+                        <a href="/abonamenty" class="text-white text-decoration-none">Szczegóły »</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card bg-warning h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Pozycje cennika</h5>
+                        <p class="card-text display-4" th:text="${aktualnyCennik.size()}">0</p>
+                    </div>
+                    <div class="card-footer d-flex">
+                        <a href="/cennik" class="text-dark text-decoration-none">Szczegóły »</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card bg-danger text-white h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Zaległe należności</h5>
+                        <p class="card-text display-4" th:text="${liczbaPrzeterminowanychNaleznosci}">0</p>
+                    </div>
+                    <div class="card-footer d-flex">
+                        <a href="/finanse" class="text-white text-decoration-none">Szczegóły »</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Symulator czasu -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Symulator upływu czasu</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading">Aktualna data symulacji: <strong th:text="${dataSym}"></strong></h5>
+                            <p>Symulator czasu pozwala na testowanie funkcji zależnych od czasu, takich jak automatyczne naliczanie należności czy monity o płatnościach.</p>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <form th:action="@{/przesun-date}" method="post" class="mb-3">
+                                    <div class="mb-3">
+                                        <label for="liczbaDni" class="form-label">Przesuń datę o dni:</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="liczbaDni" name="liczbaDni" value="1" min="1" max="365" required>
+                                            <button type="submit" class="btn btn-primary">Przesuń</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <form th:action="@{/ustaw-date}" method="post" class="mb-3">
+                                    <div class="mb-3">
+                                        <label for="nowaData" class="form-label">Ustaw konkretną datę:</label>
+                                        <div class="input-group">
+                                            <input type="date" class="form-control" id="nowaData" name="nowaData" th:value="${dataSym}" required>
+                                            <button type="submit" class="btn btn-primary">Ustaw</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <form th:action="@{/symuluj-miesiac}" method="post" class="mb-3">
+                                    <div class="mb-3">
+                                        <label for="liczbaMiesiecy" class="form-label">Symuluj upływ miesięcy:</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="liczbaMiesiecy" name="liczbaMiesiecy" value="1" min="1" max="12" required>
+                                            <button type="submit" class="btn btn-primary">Symuluj</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Szybkie akcje -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Szybkie akcje</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <a href="/klienci" class="btn btn-primary w-100">
+                                    Zarządzaj klientami
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="/abonamenty" class="btn btn-success w-100">
+                                    Zarządzaj abonamentami
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="/finanse" class="btn btn-warning w-100">
+                                    Zarządzaj finansami
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="/cennik" class="btn btn-info w-100">
+                                    Zarządzaj cennikiem
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
