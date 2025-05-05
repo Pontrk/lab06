@@ -71,18 +71,18 @@ public class AbonamentController {
 
     @PostMapping("/dodaj")
     public String dodajAbonament(@RequestParam Long klientId,
-                              @RequestParam TypAbonamentu typAbonamentu,
-                              @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataRozpoczecia,
-                              RedirectAttributes redirectAttributes) {
+            @RequestParam TypAbonamentu typAbonamentu,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataRozpoczecia,
+            RedirectAttributes redirectAttributes) {
         try {
             Abonament abonament = abonamentService.dodajAbonament(klientId, typAbonamentu, dataRozpoczecia);
-            
+
             // Naliczenie pierwszej należności
             String okresRozliczeniowy = dataRozpoczecia.format(DateTimeFormatter.ofPattern("yyyy-MM"));
             LocalDate terminPlatnosci = dataRozpoczecia.plusDays(14); // 14 dni na zapłatę
-            
+
             naleznoscService.naliczNaleznoscAbonamentu(abonament.getId(), terminPlatnosci, okresRozliczeniowy);
-            
+
             redirectAttributes.addFlashAttribute("sukces", "Abonament został dodany pomyślnie!");
             return "redirect:/abonamenty/klient/" + klientId;
         } catch (Exception e) {
@@ -92,9 +92,9 @@ public class AbonamentController {
     }
 
     @PostMapping("/zmien-typ/{id}")
-    public String zmienTypAbonamentu(@PathVariable Long id, 
-                                     @RequestParam TypAbonamentu nowyTyp,
-                                     RedirectAttributes redirectAttributes) {
+    public String zmienTypAbonamentu(@PathVariable Long id,
+            @RequestParam TypAbonamentu nowyTyp,
+            RedirectAttributes redirectAttributes) {
         try {
             Abonament abonament = abonamentService.zmienTypAbonamentu(id, nowyTyp);
             redirectAttributes.addFlashAttribute("sukces", "Typ abonamentu został zmieniony pomyślnie!");
@@ -106,15 +106,59 @@ public class AbonamentController {
     }
 
     @PostMapping("/dezaktywuj/{id}")
-    public String dezaktywujAbonament(@PathVariable Long id, 
-                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataZakonczenia,
-                                   RedirectAttributes redirectAttributes) {
+    public String dezaktywujAbonament(@PathVariable Long id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataZakonczenia,
+            RedirectAttributes redirectAttributes) {
         try {
             Abonament abonament = abonamentService.dezaktywujAbonament(id, dataZakonczenia);
             redirectAttributes.addFlashAttribute("sukces", "Abonament został dezaktywowany pomyślnie!");
             return "redirect:/abonamenty/klient/" + abonament.getKlient().getId();
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("blad", "Błąd podczas dezaktywacji abonamentu: " + e.getMessage());
+            return "redirect:/abonamenty";
+        }
+    }
+
+    @GetMapping("/dodaj")
+    public String formularzDodawania(Model model) {
+        model.addAttribute("abonamenty", abonamentService.pobierzAktywneAbonamenty());
+        model.addAttribute("klienci", klientService.pobierzWszystkichKlientow());
+        model.addAttribute("typyAbonamentu", TypAbonamentu.values());
+        model.addAttribute("dzisiaj", symulatorCzasuService.getAktualnaDatSymulacji());
+        model.addAttribute("pokazFormularzDodawania", true);
+        model.addAttribute("content", "abonamenty");
+        return "abonamenty";
+    }
+
+    @GetMapping("/zmien-typ/{id}")
+    public String formularzZmianyTypu(@PathVariable Long id, Model model) {
+        try {
+            Abonament abonament = abonamentService.znajdzAbonamentPoId(id);
+            model.addAttribute("wybranyAbonament", abonament);
+            model.addAttribute("pokazFormularzZmianyTypu", true);
+            model.addAttribute("abonamenty", abonamentService.pobierzAktywneAbonamenty());
+            model.addAttribute("typyAbonamentu", TypAbonamentu.values());
+            model.addAttribute("dzisiaj", symulatorCzasuService.getAktualnaDatSymulacji());
+            model.addAttribute("content", "abonamenty");
+            return "abonamenty";
+        } catch (Exception e) {
+            model.addAttribute("blad", "Nie znaleziono abonamentu o ID: " + id);
+            return "redirect:/abonamenty";
+        }
+    }
+
+    @GetMapping("/dezaktywuj/{id}")
+    public String formularzDezaktywacji(@PathVariable Long id, Model model) {
+        try {
+            Abonament abonament = abonamentService.znajdzAbonamentPoId(id);
+            model.addAttribute("wybranyAbonament", abonament);
+            model.addAttribute("pokazFormularzDezaktywacji", true);
+            model.addAttribute("abonamenty", abonamentService.pobierzAktywneAbonamenty());
+            model.addAttribute("dzisiaj", symulatorCzasuService.getAktualnaDatSymulacji());
+            model.addAttribute("content", "abonamenty");
+            return "abonamenty";
+        } catch (Exception e) {
+            model.addAttribute("blad", "Nie znaleziono abonamentu o ID: " + id);
             return "redirect:/abonamenty";
         }
     }

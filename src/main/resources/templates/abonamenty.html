@@ -8,9 +8,9 @@
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Zarządzanie abonamentami</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
-                <button onclick="toggleForm('dodajAbonamentForm')" class="btn btn-sm btn-primary me-2">
+                <a href="/abonamenty/dodaj" class="btn btn-sm btn-primary me-2">
                     Dodaj abonament
-                </button>
+                </a>
                 <a href="/klienci" class="btn btn-sm btn-secondary">
                     Zarządzaj klientami
                 </a>
@@ -18,7 +18,7 @@
         </div>
 
         <!-- Formularz dodawania abonamentu -->
-        <div id="dodajAbonamentForm" style="display: none;" class="card mb-4">
+        <div th:if="${pokazFormularzDodawania}" class="card mb-4">
             <div class="card-header">
                 <h5>Dodaj nowy abonament</h5>
             </div>
@@ -48,7 +48,7 @@
                         </div>
                     </div>
                     <div class="text-end">
-                        <button type="button" onclick="toggleForm('dodajAbonamentForm')" class="btn btn-secondary">Anuluj</button>
+                        <a href="/abonamenty" class="btn btn-secondary">Anuluj</a>
                         <button type="submit" class="btn btn-primary">Zapisz abonament</button>
                     </div>
                 </form>
@@ -60,15 +60,15 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>Szczegóły abonamentu</h5>
                 <div>
-                    <button onclick="toggleForm('zmienTypForm')" class="btn btn-sm btn-warning me-2">
+                    <a th:href="@{/abonamenty/zmien-typ/{id}(id=${wybranyAbonament.id})}" class="btn btn-sm btn-warning me-2">
                         Zmień typ
-                    </button>
-                    <button onclick="toggleForm('dezaktywujForm')" class="btn btn-sm btn-danger me-2">
+                    </a>
+                    <a th:href="@{/abonamenty/dezaktywuj/{id}(id=${wybranyAbonament.id})}" class="btn btn-sm btn-danger me-2">
                         Dezaktywuj
-                    </button>
-                    <button onclick="toggleForm('dodajSubkontoForm')" class="btn btn-sm btn-success">
+                    </a>
+                    <a th:href="@{/subkonta/dodaj/{id}(id=${wybranyAbonament.id})}" class="btn btn-sm btn-success">
                         Dodaj subkonto
-                    </button>
+                    </a>
                 </div>
             </div>
             <div class="card-body">
@@ -142,70 +142,81 @@
                         </table>
                     </div>
                 </div>
-                
-                <!-- Formularz zmiany typu -->
-                <div id="zmienTypForm" style="display: none;" class="mt-3 border-top pt-3">
-                    <h6>Zmień typ abonamentu</h6>
-                    <form th:action="@{/abonamenty/zmien-typ/{id}(id=${wybranyAbonament.id})}" method="post">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="nowyTyp" class="form-label">Nowy typ abonamentu</label>
-                                <select class="form-select" id="nowyTyp" name="nowyTyp" required>
-                                    <option value="">Wybierz typ</option>
-                                    <option th:each="typ : ${typyAbonamentu}" th:value="${typ}" 
-                                            th:text="${typ}" th:selected="${typ == wybranyAbonament.typAbonamentu}"></option>
-                                </select>
-                            </div>
+            </div>
+        </div>
+
+        <!-- Formularze dla szczegółów abonamentu -->
+        <!-- Wyświetlane jeśli ustawione przez kontroler -->
+        <div th:if="${pokazFormularzZmianyTypu}" class="card mb-4">
+            <div class="card-header">
+                <h5>Zmień typ abonamentu</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/abonamenty/zmien-typ/{id}(id=${wybranyAbonament.id})}" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nowyTyp" class="form-label">Nowy typ abonamentu</label>
+                            <select class="form-select" id="nowyTyp" name="nowyTyp" required>
+                                <option value="">Wybierz typ</option>
+                                <option th:each="typ : ${typyAbonamentu}" th:value="${typ}" 
+                                        th:text="${typ}" th:selected="${typ == wybranyAbonament.typAbonamentu}"></option>
+                            </select>
                         </div>
-                        <div class="text-end">
-                            <button type="button" onclick="toggleForm('zmienTypForm')" class="btn btn-secondary">Anuluj</button>
-                            <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                    </div>
+                    <div class="text-end">
+                        <a th:href="@{/abonamenty/szczegoly/{id}(id=${wybranyAbonament.id})}" class="btn btn-secondary">Anuluj</a>
+                        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div th:if="${pokazFormularzDezaktywacji}" class="card mb-4">
+            <div class="card-header">
+                <h5>Dezaktywuj abonament</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/abonamenty/dezaktywuj/{id}(id=${wybranyAbonament.id})}" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="dataZakonczenia" class="form-label">Data zakończenia</label>
+                            <input type="date" class="form-control" id="dataZakonczenia" name="dataZakonczenia" 
+                                   th:value="${dzisiaj}" required>
                         </div>
-                    </form>
-                </div>
-                
-                <!-- Formularz dezaktywacji -->
-                <div id="dezaktywujForm" style="display: none;" class="mt-3 border-top pt-3">
-                    <h6>Dezaktywuj abonament</h6>
-                    <form th:action="@{/abonamenty/dezaktywuj/{id}(id=${wybranyAbonament.id})}" method="post">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="dataZakonczenia" class="form-label">Data zakończenia</label>
-                                <input type="date" class="form-control" id="dataZakonczenia" name="dataZakonczenia" 
-                                       th:value="${dzisiaj}" required>
-                            </div>
+                    </div>
+                    <div class="alert alert-warning">
+                        <strong>Uwaga!</strong> Dezaktywacja abonamentu spowoduje, że klient straci dostęp do usługi. 
+                        Ta operacja nie może być cofnięta.
+                    </div>
+                    <div class="text-end">
+                        <a th:href="@{/abonamenty/szczegoly/{id}(id=${wybranyAbonament.id})}" class="btn btn-secondary">Anuluj</a>
+                        <button type="submit" class="btn btn-danger">Dezaktywuj abonament</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div th:if="${pokazFormularzDodawaniaSubkonta}" class="card mb-4">
+            <div class="card-header">
+                <h5>Dodaj nowe subkonto</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/subkonta/dodaj/{id}(id=${wybranyAbonament.id})}" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="login" class="form-label">Login</label>
+                            <input type="text" class="form-control" id="login" name="login" required>
                         </div>
-                        <div class="alert alert-warning">
-                            <strong>Uwaga!</strong> Dezaktywacja abonamentu spowoduje, że klient straci dostęp do usługi. 
-                            Ta operacja nie może być cofnięta.
+                        <div class="col-md-6 mb-3">
+                            <label for="haslo" class="form-label">Hasło</label>
+                            <input type="password" class="form-control" id="haslo" name="haslo" required>
                         </div>
-                        <div class="text-end">
-                            <button type="button" onclick="toggleForm('dezaktywujForm')" class="btn btn-secondary">Anuluj</button>
-                            <button type="submit" class="btn btn-danger">Dezaktywuj abonament</button>
-                        </div>
-                    </form>
-                </div>
-                
-                <!-- Formularz dodawania subkonta -->
-                <div id="dodajSubkontoForm" style="display: none;" class="mt-3 border-top pt-3">
-                    <h6>Dodaj nowe subkonto</h6>
-                    <form th:action="@{/subkonta/dodaj/{id}(id=${wybranyAbonament.id})}" method="post">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="login" class="form-label">Login</label>
-                                <input type="text" class="form-control" id="login" name="login" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="haslo" class="form-label">Hasło</label>
-                                <input type="password" class="form-control" id="haslo" name="haslo" required>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <button type="button" onclick="toggleForm('dodajSubkontoForm')" class="btn btn-secondary">Anuluj</button>
-                            <button type="submit" class="btn btn-success">Dodaj subkonto</button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="text-end">
+                        <a th:href="@{/abonamenty/szczegoly/{id}(id=${wybranyAbonament.id})}" class="btn btn-secondary">Anuluj</a>
+                        <button type="submit" class="btn btn-success">Dodaj subkonto</button>
+                    </div>
+                </form>
             </div>
         </div>
 

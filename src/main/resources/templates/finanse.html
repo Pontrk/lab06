@@ -8,17 +8,17 @@
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Zarządzanie finansami</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
-                <button onclick="toggleForm('dodajNaleznoscForm')" class="btn btn-sm btn-primary me-2">
+                <a href="/finanse/dodaj-naleznosc" class="btn btn-sm btn-primary me-2">
                     Dodaj należność
-                </button>
-                <button onclick="toggleForm('dodajWplateForm')" class="btn btn-sm btn-success me-2">
+                </a>
+                <a href="/finanse/dodaj-wplate" class="btn btn-sm btn-success me-2">
                     Zarejestruj wpłatę
-                </button>
+                </a>
             </div>
         </div>
 
         <!-- Formularz dodawania należności -->
-        <div id="dodajNaleznoscForm" style="display: none;" class="card mb-4">
+        <div th:if="${pokazFormularzDodawaniaNaleznosci}" class="card mb-4">
             <div class="card-header">
                 <h5>Dodaj nową należność</h5>
             </div>
@@ -46,7 +46,7 @@
                         </div>
                     </div>
                     <div class="text-end">
-                        <button type="button" onclick="toggleForm('dodajNaleznoscForm')" class="btn btn-secondary">Anuluj</button>
+                        <a href="/finanse" class="btn btn-secondary">Anuluj</a>
                         <button type="submit" class="btn btn-primary">Dodaj należność</button>
                     </div>
                 </form>
@@ -54,7 +54,7 @@
         </div>
 
         <!-- Formularz dodawania wpłaty -->
-        <div id="dodajWplateForm" style="display: none;" class="card mb-4">
+        <div th:if="${pokazFormularzDodawaniaWplaty}" class="card mb-4">
             <div class="card-header">
                 <h5>Zarejestruj nową wpłatę</h5>
             </div>
@@ -81,7 +81,7 @@
                         </div>
                     </div>
                     <div class="text-end">
-                        <button type="button" onclick="toggleForm('dodajWplateForm')" class="btn btn-secondary">Anuluj</button>
+                        <a href="/finanse" class="btn btn-secondary">Anuluj</a>
                         <button type="submit" class="btn btn-success">Zarejestruj wpłatę</button>
                     </div>
                 </form>
@@ -121,19 +121,19 @@
                     </div>
                     <div class="col-md-6">
                         <div class="d-flex justify-content-end">
-                            <button onclick="toggleForm('dodajNaleznoscAbonamentuForm')" class="btn btn-sm btn-primary me-2">
+                            <a th:href="@{/finanse/dodaj-naleznosc-abonament/{id}(id=${wybranyAbonament.id})}" class="btn btn-sm btn-primary me-2">
                                 Dodaj należność
-                            </button>
-                            <button onclick="toggleForm('dodajWplateAbonamentuForm')" class="btn btn-sm btn-success">
+                            </a>
+                            <a th:href="@{/finanse/dodaj-wplate-abonament/{id}(id=${wybranyAbonament.id})}" class="btn btn-sm btn-success">
                                 Zarejestruj wpłatę
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Formularze dla wybranego abonamentu -->
                 <!-- Formularz dodawania należności dla wybranego abonamentu -->
-                <div id="dodajNaleznoscAbonamentuForm" style="display: none;" class="border-top pt-3 mb-4">
+                <div th:if="${pokazFormularzDodawaniaNaleznosciAbonamentu}" class="border-top pt-3 mb-4">
                     <h6>Dodaj nową należność dla tego abonamentu</h6>
                     <form th:action="@{/finanse/dodaj-naleznosc}" method="post">
                         <input type="hidden" name="abonamentId" th:value="${wybranyAbonament.id}">
@@ -150,14 +150,14 @@
                             </div>
                         </div>
                         <div class="text-end">
-                            <button type="button" onclick="toggleForm('dodajNaleznoscAbonamentuForm')" class="btn btn-secondary">Anuluj</button>
+                            <a th:href="@{/finanse/abonament/{id}(id=${wybranyAbonament.id})}" class="btn btn-secondary">Anuluj</a>
                             <button type="submit" class="btn btn-primary">Dodaj należność</button>
                         </div>
                     </form>
                 </div>
 
                 <!-- Formularz dodawania wpłaty dla wybranego abonamentu -->
-                <div id="dodajWplateAbonamentuForm" style="display: none;" class="border-top pt-3 mb-4">
+                <div th:if="${pokazFormularzDodawaniaWplatyAbonamentu}" class="border-top pt-3 mb-4">
                     <h6>Zarejestruj nową wpłatę dla tego abonamentu</h6>
                     <form th:action="@{/finanse/dodaj-wplate}" method="post">
                         <input type="hidden" name="abonamentId" th:value="${wybranyAbonament.id}">
@@ -173,8 +173,44 @@
                             </div>
                         </div>
                         <div class="text-end">
-                            <button type="button" onclick="toggleForm('dodajWplateAbonamentuForm')" class="btn btn-secondary">Anuluj</button>
+                            <a th:href="@{/finanse/abonament/{id}(id=${wybranyAbonament.id})}" class="btn btn-secondary">Anuluj</a>
                             <button type="submit" class="btn btn-success">Zarejestruj wpłatę</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Formularz korekty należności -->
+                <div th:if="${naleznoscDoKorekty != null}" class="border-top pt-3 mb-4">
+                    <h6>Korygowanie kwoty należności</h6>
+                    <form th:action="@{/finanse/koryguj-naleznosc/{id}(id=${naleznoscDoKorekty.id})}" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <th>Okres:</th>
+                                        <td th:text="${naleznoscDoKorekty.okresRozliczeniowy}"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Obecna kwota:</th>
+                                        <td th:text="${#numbers.formatDecimal(naleznoscDoKorekty.kwota, 1, 2) + ' zł'}"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Termin płatności:</th>
+                                        <td th:text="${naleznoscDoKorekty.terminPlatnosci}"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="nowaKwota" class="form-label">Nowa kwota (zł)</label>
+                                    <input type="number" step="0.01" class="form-control" id="nowaKwota" name="nowaKwota"
+                                          th:value="${naleznoscDoKorekty.kwota}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <a th:href="@{/finanse/abonament/{id}(id=${wybranyAbonament.id})}" class="btn btn-secondary">Anuluj</a>
+                            <button type="submit" class="btn btn-warning">Koryguj kwotę</button>
                         </div>
                     </form>
                 </div>
@@ -210,11 +246,11 @@
                                         <div class="btn-group btn-group-sm">
                                             <a th:if="${!naleznosc.oplacona}" th:href="@{/finanse/oplacona/{id}(id=${naleznosc.id})}" 
                                                class="btn btn-success" title="Oznacz jako opłacona">
-                                                <i class="bi bi-check"></i>
+                                                <i class="bi bi-check"></i> Opłacona
                                             </a>
                                             <a th:href="@{/finanse/koryguj-naleznosc/{id}(id=${naleznosc.id})}" 
                                                class="btn btn-warning" title="Koryguj kwotę">
-                                                <i class="bi bi-pencil"></i>
+                                                <i class="bi bi-pencil"></i> Koryguj
                                             </a>
                                         </div>
                                     </td>
@@ -317,3 +353,4 @@
     </div>
 </body>
 </html>
+                            

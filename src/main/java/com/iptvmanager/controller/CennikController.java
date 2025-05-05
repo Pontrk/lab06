@@ -42,7 +42,7 @@ public class CennikController {
                     .filter(c -> c.getId().equals(id))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono pozycji cennika o ID: " + id));
-            
+
             model.addAttribute("cennikAktualny", cennikService.pobierzAktualnyCennik());
             model.addAttribute("cennikHistoria", cennikService.pobierzWszystkiePozycjeCennika());
             model.addAttribute("cennikEdit", cennik);
@@ -58,30 +58,42 @@ public class CennikController {
 
     @PostMapping("/dodaj")
     public String dodajPozycjeCennika(@RequestParam TypAbonamentu typAbonamentu,
-                                    @RequestParam BigDecimal cena,
-                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataOd,
-                                    RedirectAttributes redirectAttributes) {
+            @RequestParam BigDecimal cena,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataOd,
+            RedirectAttributes redirectAttributes) {
         try {
             cennikService.dodajPozycjeCennika(typAbonamentu, cena, dataOd);
             redirectAttributes.addFlashAttribute("sukces", "Pozycja cennika została dodana pomyślnie!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("blad", "Błąd podczas dodawania pozycji cennika: " + e.getMessage());
         }
-        
+
         return "redirect:/cennik";
     }
 
     @PostMapping("/dezaktywuj/{id}")
     public String dezaktywujPozycjeCennika(@PathVariable Long id,
-                                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataDo,
-                                        RedirectAttributes redirectAttributes) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataDo,
+            RedirectAttributes redirectAttributes) {
         try {
             cennikService.dezaktywujPozycjeCennika(id, dataDo);
             redirectAttributes.addFlashAttribute("sukces", "Pozycja cennika została dezaktywowana pomyślnie!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("blad", "Błąd podczas dezaktywacji pozycji cennika: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("blad",
+                    "Błąd podczas dezaktywacji pozycji cennika: " + e.getMessage());
         }
-        
+
         return "redirect:/cennik";
+    }
+
+    @GetMapping("/dodaj")
+    public String formularzDodawania(Model model) {
+        model.addAttribute("cennikAktualny", cennikService.pobierzAktualnyCennik());
+        model.addAttribute("cennikHistoria", cennikService.pobierzWszystkiePozycjeCennika());
+        model.addAttribute("typyAbonamentu", TypAbonamentu.values());
+        model.addAttribute("dzisiaj", symulatorCzasuService.getAktualnaDatSymulacji());
+        model.addAttribute("pokazFormularzDodawania", true);
+        model.addAttribute("content", "cennik");
+        return "cennik";
     }
 }

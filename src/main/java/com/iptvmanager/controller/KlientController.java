@@ -42,32 +42,32 @@ public class KlientController {
     }
 
     @PostMapping("/dodaj")
-    public String dodajKlienta(@RequestParam String imie, 
-                               @RequestParam String nazwisko, 
-                               @RequestParam String numerKlienta, 
-                               RedirectAttributes redirectAttributes) {
+    public String dodajKlienta(@RequestParam String imie,
+            @RequestParam String nazwisko,
+            @RequestParam String numerKlienta,
+            RedirectAttributes redirectAttributes) {
         try {
             klientService.dodajKlienta(imie, nazwisko, numerKlienta);
             redirectAttributes.addFlashAttribute("sukces", "Klient został dodany pomyślnie!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("blad", "Błąd podczas dodawania klienta: " + e.getMessage());
         }
-        
+
         return "redirect:/klienci";
     }
 
     @PostMapping("/edytuj/{id}")
-    public String aktualizujKlienta(@PathVariable Long id, 
-                                  @RequestParam String imie, 
-                                  @RequestParam String nazwisko, 
-                                  RedirectAttributes redirectAttributes) {
+    public String aktualizujKlienta(@PathVariable Long id,
+            @RequestParam String imie,
+            @RequestParam String nazwisko,
+            RedirectAttributes redirectAttributes) {
         try {
             klientService.aktualizujKlienta(id, imie, nazwisko);
             redirectAttributes.addFlashAttribute("sukces", "Klient został zaktualizowany pomyślnie!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("blad", "Błąd podczas aktualizacji klienta: " + e.getMessage());
         }
-        
+
         return "redirect:/klienci";
     }
 
@@ -79,7 +79,15 @@ public class KlientController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("blad", "Błąd podczas usuwania klienta: " + e.getMessage());
         }
-        
+
         return "redirect:/klienci";
+    }
+
+    @GetMapping("/dodaj")
+    public String formularzDodawania(Model model) {
+        model.addAttribute("klienci", klientService.pobierzWszystkichKlientow());
+        model.addAttribute("pokazFormularzDodawania", true);
+        model.addAttribute("content", "klienci");
+        return "klienci";
     }
 }

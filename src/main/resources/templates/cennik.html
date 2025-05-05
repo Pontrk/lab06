@@ -8,20 +8,22 @@
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Zarządzanie cennikiem</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
-                <button onclick="toggleForm('dodajPozycjeForm')" class="btn btn-sm btn-primary me-2">
+                <a href="/cennik/dodaj" class="btn btn-sm btn-primary me-2">
                     Dodaj pozycję cennika
-                </button>
-                <button onclick="toggleTab('historiaTab')" id="historiaBtn" class="btn btn-sm btn-outline-secondary me-2">
+                </a>
+                <a id="historiaBtn" href="/cennik?tab=historia" class="btn btn-sm btn-outline-secondary me-2" 
+                   th:classappend="${param.tab != null && param.tab[0] == 'historia' ? 'active' : ''}">
                     Historia cennika
-                </button>
-                <button onclick="toggleTab('aktualnyTab')" id="aktualnyBtn" class="btn btn-sm btn-outline-secondary active">
+                </a>
+                <a id="aktualnyBtn" href="/cennik" class="btn btn-sm btn-outline-secondary"
+                   th:classappend="${param.tab == null || param.tab[0] != 'historia' ? 'active' : ''}">
                     Aktualny cennik
-                </button>
+                </a>
             </div>
         </div>
 
         <!-- Formularz dodawania pozycji cennika -->
-        <div id="dodajPozycjeForm" style="display: none;" class="card mb-4">
+        <div th:if="${pokazFormularzDodawania}" class="card mb-4">
             <div class="card-header">
                 <h5>Dodaj nową pozycję cennika</h5>
             </div>
@@ -46,7 +48,7 @@
                         </div>
                     </div>
                     <div class="text-end">
-                        <button type="button" onclick="toggleForm('dodajPozycjeForm')" class="btn btn-secondary">Anuluj</button>
+                        <a href="/cennik" class="btn btn-secondary">Anuluj</a>
                         <button type="submit" class="btn btn-primary">Dodaj do cennika</button>
                     </div>
                 </form>
@@ -54,7 +56,7 @@
         </div>
 
         <!-- Aktualny cennik -->
-        <div id="aktualnyTab" class="card mb-4">
+        <div th:if="${param.tab == null || param.tab[0] != 'historia'}" id="aktualnyTab" class="card mb-4">
             <div class="card-header">
                 <h5>Aktualny cennik</h5>
             </div>
@@ -83,8 +85,7 @@
                                 <td th:text="${pozycja.dataDo != null ? pozycja.dataDo : '-'}"></td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a th:href="@{/cennik/dezaktywuj/{id}(id=${pozycja.id})}" class="btn btn-danger"
-                                           onclick="return confirm('Czy na pewno chcesz dezaktywować tę pozycję cennika?')">
+                                        <a th:href="@{/cennik/dezaktywuj/{id}(id=${pozycja.id})}" class="btn btn-danger">
                                             Dezaktywuj
                                         </a>
                                     </div>
@@ -97,7 +98,7 @@
         </div>
 
         <!-- Historia cennika -->
-        <div id="historiaTab" class="card mb-4" style="display: none;">
+        <div th:if="${param.tab != null && param.tab[0] == 'historia'}" id="historiaTab" class="card mb-4">
             <div class="card-header">
                 <h5>Historia cennika</h5>
             </div>
@@ -135,7 +136,7 @@
             </div>
         </div>
         
-        <!-- Formularz dezaktywacji pozycji cennika (pojawia się po kliknięciu "Dezaktywuj") -->
+        <!-- Formularz dezaktywacji pozycji cennika -->
         <div th:if="${cennikEdit != null}" class="card mb-4">
             <div class="card-header">
                 <h5>Dezaktywacja pozycji cennika</h5>
@@ -179,21 +180,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function toggleTab(tabId) {
-            if (tabId === 'aktualnyTab') {
-                document.getElementById('aktualnyTab').style.display = 'block';
-                document.getElementById('historiaTab').style.display = 'none';
-                document.getElementById('aktualnyBtn').classList.add('active');
-                document.getElementById('historiaBtn').classList.remove('active');
-            } else {
-                document.getElementById('aktualnyTab').style.display = 'none';
-                document.getElementById('historiaTab').style.display = 'block';
-                document.getElementById('aktualnyBtn').classList.remove('active');
-                document.getElementById('historiaBtn').classList.add('active');
-            }
-        }
-    </script>
 </body>
 </html>

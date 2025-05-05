@@ -34,6 +34,7 @@
             padding-top: 20px;
         }
     </style>
+    
 </head>
 <body>
     <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
@@ -108,16 +109,6 @@
     </div>
 
     <script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
-    <script>
-        // Funkcja do pokazywania/ukrywania formularzy
-        function toggleForm(formId) {
-            const form = document.getElementById(formId);
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'block';
-            } else {
-                form.style.display = 'none';
-            }
-        }
-    </script>
+    
 </body>
 </html>
